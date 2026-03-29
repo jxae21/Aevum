@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedFind — Local Health Resources</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --warm-white: #FDFAF4;
+    --ink: #1A1714;
+    --ink-soft: #3D3830;
+    --rust: #C4522A;
+    --rust-light: #E8714A;
+    --teal: #2A7A72;
+    --teal-light: #3DA89D;
+    --gold: #D4A843;
+    --muted: #8C8278;
+    --border: #DDD5C8;
+    --card-bg: #FFFFFF;
+    --shadow: 0 2px 20px rgba(26,23,20,0.08);
+    --shadow-hover: 0 8px 40px rgba(26,23,20,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--cream);
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { color: var(--rust-light); }
+
+  .header-tag {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--ink);
+    padding: 72px 40px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(196,82,42,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 20%;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(42,122,114,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rust-light);
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    line-height: 1.12;
+    color: var(--cream);
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--rust-light);
+  }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: var(--muted);
+    margin-bottom: 44px;
+    line-height: 1.6;
+    max-width: 520px;
+  }
+
+  /* ── SEARCH BAR ── */
+  .search-wrap {
+    display: flex;
+    gap: 0;
+    max-width: 560px;
+    background: var(--warm-white);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.06), 0 16px 48px rgba(0,0,0,0.4);
+  }
+
+  .zip-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 18px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    outline: none;
+    letter-spacing: 0.04em;
+  }
+
+  .zip-input::placeholder { color: var(--muted); font-weight: 300; }
+
+  .search-btn {
+    background: var(--rust);
+    color: #fff;
+    border: none;
+    padding: 18px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .search-btn:hover { background: var(--rust-light); }
+
+  .zip-error {
+    font-size: 0.82rem;
+    color: var(--rust-light);
+    margin-top: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .zip-error.show { opacity: 1; }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 52px 40px 80px;
+  }
+
+  /* ── FILTERS ── */
+  .filters-section {
+    margin-bottom: 40px;
+    display: none;
+  }
+  .filters-section.visible { display: block; }
+
+  .filters-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .filters-title {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .clear-btn {
+    font-size: 0.8rem;
+    color: var(--rust);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .filter-groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+  }
+
+  .filter-group {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .filter-group-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  .filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pill {
+    padding: 7px 14px;
+    border-radius: 100px;
+    border: 1.5px solid var(--border);
+    background: var(--warm-white);
+    font-size: 0.82rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+
+  .pill:hover {
+    border-color: var(--rust);
+    color: var(--rust);
+  }
+
+  .pill.active {
+    background: var(--rust);
+    border-color: var(--rust);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  /* ── RESULTS ── */
+  .results-header {
+    display: none;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .results-header.visible { display: flex; }
+
+  .results-location {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: var(--ink);
+  }
+
+  .results-location span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: var(--muted);
+    font-style: normal;
+    margin-left: 10px;
+  }
+
+  .results-count {
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  /* ── CARDS ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 28px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.25s, transform 0.25s;
+    animation: cardIn 0.4s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-accent {
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 8px 0 0 8px;
+  }
+
+  .cat-primary-care  .card-accent { background: var(--teal); }
+  .cat-mental-health .card-accent { background: #7B5EA7; }
+  .cat-urgent-care   .card-accent { background: var(--rust); }
+  .cat-pharmacy      .card-accent { background: var(--gold); }
+  .cat-dental        .card-accent { background: #3A7BD5; }
+  .cat-specialty     .card-accent { background: #5A8A5A; }
+  .cat-community     .card-accent { background: #C4822A; }
+
+  .card-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-bottom: 14px;
+  }
+
+  .cat-primary-care  .card-tag { background: rgba(42,122,114,0.1);  color: var(--teal); }
+  .cat-mental-health .card-tag { background: rgba(123,94,167,0.1);  color: #7B5EA7; }
+  .cat-urgent-care   .card-tag { background: rgba(196,82,42,0.1);   color: var(--rust); }
+  .cat-pharmacy      .card-tag { background: rgba(212,168,67,0.12); color: #A07820; }
+  .cat-dental        .card-tag { background: rgba(58,123,213,0.1);  color: #3A7BD5; }
+  .cat-specialty     .card-tag { background: rgba(90,138,90,0.1);   color: #3A6B3A; }
+  .cat-community     .card-tag { background: rgba(196,130,42,0.1);  color: #8A5A10; }
+
+  .card-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--ink);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .card-address {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  .card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .badge {
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 4px;
+    background: var(--cream);
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: 4px;
+  }
+
+  .card-phone {
+    font-weight: 500;
+    color: var(--teal);
+    text-decoration: none;
+  }
+
+  .card-distance {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .card-hours {
+    margin-top: 4px;
+    font-size: 0.78rem;
+  }
+
+  .hours-open  { color: #3A8A3A; }
+  .hours-closed { color: var(--rust); }
+
+  .card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .card-btn {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+    border: none;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .btn-primary:hover { background: var(--ink-soft); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1.5px solid var(--border) !important;
+    border: none;
+  }
+  .btn-outline:hover { border-color: var(--ink-soft) !important; background: var(--cream); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    display: none;
+  }
+  .empty-state.visible { display: block; }
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+
+  .empty-state h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    margin-bottom: 8px;
+    color: var(--ink-soft);
+  }
+
+  .empty-state p { color: var(--muted); font-size: 0.9rem; }
+
+  /* ── LOADING ── */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 80px 20px;
+  }
+  .loading.visible { display: block; }
+
+  .loader {
+    display: inline-flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .loader-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--rust);
+    animation: bounce 1.2s ease-in-out infinite;
+  }
+  .loader-dot:nth-child(2) { animation-delay: 0.15s; background: var(--teal); }
+  .loader-dot:nth-child(3) { animation-delay: 0.3s;  background: var(--gold); }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  .loading p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ── INTRO ILLUSTRATION ── */
+  .intro-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .intro-grid {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  .intro-chip {
+    padding: 8px 18px;
+    border-radius: 100px;
+    border: 1.5px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    background: var(--warm-white);
+  }
+
+  .intro-h {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+
+  .intro-p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+    max-width: 400px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    header { padding: 0 20px; }
+    .hero { padding: 52px 20px 60px; }
+    .main { padding: 36px 20px 60px; }
+    .filter-groups { gap: 20px; }
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Med<span>Find</span></div>
+  <div class="header-tag">Local Health Resources</div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Find care near you</div>
+    <h1>Health resources,<br><em>where you are.</em></h1>
+    <p class="hero-sub">Enter your ZIP code to discover clinics, services, and providers matched to your specific health needs — all in one place.</p>
+    <div class="search-wrap">
+      <input class="zip-input" id="zipInput" type="text" placeholder="Enter ZIP code (e.g. 90210)" maxlength="5" inputmode="numeric">
+      <button class="search-btn" onclick="doSearch()">Find Resources →</button>
+    </div>
+    <div class="zip-error" id="zipError">Please enter a valid 5-digit ZIP code.</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- FILTERS -->
+  <div class="filters-section" id="filtersSection">
+    <div class="filters-header">
+      <div class="filters-title">Filter by need</div>
+      <button class="clear-btn" onclick="clearFilters()">Clear all</button>
+    </div>
+    <div class="filter-groups">
+
+      <div class="filter-group">
+        <div class="filter-group-label">Care Type</div>
+        <div class="filter-pills" id="filterCareType">
+          <button class="pill" data-group="careType" data-value="primary-care"     onclick="toggleFilter(this)">Primary Care</button>
+          <button class="pill" data-group="careType" data-value="urgent-care"      onclick="toggleFilter(this)">Urgent Care</button>
+          <button class="pill" data-group="careType" data-value="mental-health"    onclick="toggleFilter(this)">Mental Health</button>
+          <button class="pill" data-group="careType" data-value="dental"           onclick="toggleFilter(this)">Dental</button>
+          <button class="pill" data-group="careType" data-value="pharmacy"         onclick="toggleFilter(this)">Pharmacy</button>
+          <button class="pill" data-group="careType" data-value="specialty"        onclick="toggleFilter(this)">Specialty</button>
+          <button class="pill" data-group="careType" data-value="community"        onclick="toggleFilter(this)">Community Health</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-label">Access & Coverage</div>
+        <div class="filter-pills" id="filterAccess">
+          <button class="pill" data-group="access" data-value="sliding-scale"     onclick="toggleFilter(this)">Sliding Scale Fees</button>
+          <button class="pill" data-group="access" data-value="medicaid"          onclick="toggleFilter(this)">Accepts Medicaid</button>
+          <button class="pill" data-group="access" data-value="uninsured"         onclick="toggleFilter(this)">Free / Uninsured</button>
+          <button class="pill" data-group="access" data-value="telehealth"        onclick="toggleFilter(this)">Telehealth</button>
+          <button class="pill" data-group="access" data-value="walk-in"           onclick="toggleFilter(this)">Walk-in Available</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-label">Population / Language</div>
+        <div class="filter-pills" id="filterPop">
+          <button class="pill" data-group="population" data-value="pediatric"     onclick="toggleFilter(this)">Children / Pediatric</button>
+          <button class="pill" data-group="population" data-value="senior"        onclick="toggleFilter(this)">Seniors (65+)</button>
+          <button class="pill" data-group="population" data-value="womens"        onclick="toggleFilter(this)">Women's Health</button>
+          <button class="pill" data-group="population" data-value="spanish"       onclick="toggleFilter(this)">Spanish Language</button>
+          <button class="pill" data-group="population" data-value="lgbtq"         onclick="toggleFilter(this)">LGBTQ+ Affirming</button>
+          <button class="pill" data-group="population" data-value="veterans"      onclick="toggleFilter(this)">Veterans</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RESULTS HEADER -->
+  <div class="results-header" id="resultsHeader">
+    <div class="results-location" id="resultsLocation">Resources near <em id="zipDisplay"></em></div>
+    <div class="results-count" id="resultsCount"></div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading" id="loadingState">
+    <div class="loader">
+      <div class="loader-dot"></div>
+      <div class="loader-dot"></div>
+      <div class="loader-dot"></div>
+    </div>
+    <p>Searching for resources near you…</p>
+  </div>
+
+  <!-- INTRO STATE -->
+  <div class="intro-state" id="introState">
+    <div class="intro-grid">
+      <div class="intro-chip">🏥 Clinics & Hospitals</div>
+      <div class="intro-chip">💊 Pharmacies</div>
+      <div class="intro-chip">🧠 Mental Health</div>
+      <div class="intro-chip">🦷 Dental</div>
+      <div class="intro-chip">🤝 Community Health</div>
+    </div>
+    <div class="intro-h">Your local care guide</div>
+    <p class="intro-p">Enter a ZIP code above to see curated health resources in that area. Use filters to narrow results by your specific needs, insurance, or language preferences.</p>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🔍</div>
+    <h3>No matches found</h3>
+    <p>Try adjusting your filters or entering a different ZIP code.</p>
+  </div>
+
+  <!-- CARDS -->
+  <div class="cards-grid" id="cardsGrid"></div>
+
+</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+const RESOURCES = [
+  {
+    id: 1,
+    name: "Central Community Health Center",
+    address: "428 W Main St, Suite 101",
+    phone: "(555) 200-1000",
+    category: "primary-care",
+    categoryLabel: "Primary Care",
+    tags: ["Medicaid Accepted", "Sliding Scale", "Walk-in"],
+    access: ["sliding-scale","medicaid","walk-in"],
+    population: ["pediatric","womens","spanish"],
+    hours: "Mon–Fri 8am–6pm · Sat 9am–2pm",
+    open: true,
+    distance: "0.4 mi",
+    website: "#",
+    notes: "Full-service federally qualified health center serving all income levels.",
+  },
+  {
+    id: 2,
+    name: "MindBridge Counseling & Psychiatry",
+    address: "1201 Oak Boulevard, 3rd Floor",
+    phone: "(555) 310-5522",
+    category: "mental-health",
+    categoryLabel: "Mental Health",
+    tags: ["Telehealth", "Sliding Scale", "LGBTQ+ Affirming"],
+    access: ["sliding-scale","telehealth"],
+    population: ["lgbtq","spanish"],
+    hours: "Mon–Thu 9am–7pm · Fri 9am–4pm",
+    open: true,
+    distance: "0.8 mi",
+    website: "#",
+    notes: "Individual therapy, group sessions, medication management.",
+  },
+  {
+    id: 3,
+    name: "FirstCare Urgent & Walk-In Clinic",
+    address: "7700 Commerce Park Dr",
+    phone: "(555) 190-8833",
+    category: "urgent-care",
+    categoryLabel: "Urgent Care",
+    tags: ["Walk-in", "Medicaid", "X-Ray On-Site"],
+    access: ["medicaid","walk-in"],
+    population: ["pediatric","senior"],
+    hours: "Daily 8am–10pm",
+    open: true,
+    distance: "1.1 mi",
+    website: "#",
+    notes: "No appointment needed. Average wait under 20 minutes.",
+  },
+  {
+    id: 4,
+    name: "Sunrise Free Clinic",
+    address: "89 Elm Street",
+    phone: "(555) 102-4400",
+    category: "primary-care",
+    categoryLabel: "Primary Care",
+    tags: ["Free", "Uninsured Welcome", "Volunteer-Run"],
+    access: ["uninsured"],
+    population: ["veterans","spanish"],
+    hours: "Tue & Thu 5pm–8pm · Sat 9am–1pm",
+    open: false,
+    distance: "1.4 mi",
+    website: "#",
+    notes: "Free primary and preventive care for uninsured residents.",
+  },
+  {
+    id: 5,
+    name: "Hillside Dental Care Cooperative",
+    address: "3310 Hilltop Way",
+    phone: "(555) 430-7700",
+    category: "dental",
+    categoryLabel: "Dental",
+    tags: ["Medicaid", "Sliding Scale", "Spanish"],
+    access: ["sliding-scale","medicaid"],
+    population: ["pediatric","spanish"],
+    hours: "Mon–Fri 8am–5pm",
+    open: true,
+    distance: "1.7 mi",
+    website: "#",
+    notes: "Preventive, restorative, and emergency dental services.",
+  },
+  {
+    id: 6,
+    name: "Harbor View Pharmacy + Clinic",
+    address: "512 Harbor Blvd",
+    phone: "(555) 660-3311",
+    category: "pharmacy",
+    categoryLabel: "Pharmacy",
+    tags: ["Vaccinations", "Telehealth Consults", "340B Pricing"],
+    access: ["medicaid","telehealth"],
+    population: ["senior"],
+    hours: "Mon–Sat 8am–9pm · Sun 10am–6pm",
+    open: true,
+    distance: "2.0 mi",
+    website: "#",
+    notes: "In-store pharmacist consultations and discounted medications for qualifying patients.",
+  },
+  {
+    id: 7,
+    name: "Veterans Health Outreach Office",
+    address: "220 Veterans Memorial Pkwy",
+    phone: "(555) 990-1234",
+    category: "community",
+    categoryLabel: "Community Health",
+    tags: ["Veterans Only", "Free", "Benefits Navigation"],
+    access: ["uninsured"],
+    population: ["veterans"],
+    hours: "Mon–Fri 9am–5pm",
+    open: false,
+    distance: "2.3 mi",
+    website: "#",
+    notes: "VA enrollment help, health screenings, and referrals for eligible veterans.",
+  },
+  {
+    id: 8,
+    name: "Women's Wellness & Reproductive Clinic",
+    address: "845 Garland Ave, Suite 4",
+    phone: "(555) 770-9090",
+    category: "specialty",
+    categoryLabel: "Specialty Care",
+    tags: ["Women's Health", "Medicaid", "LGBTQ+ Affirming"],
+    access: ["medicaid","telehealth"],
+    population: ["womens","lgbtq"],
+    hours: "Mon–Fri 8:30am–5pm",
+    open: true,
+    distance: "2.5 mi",
+    website: "#",
+    notes: "OB/GYN, family planning, STI testing, and prenatal care.",
+  },
+  {
+    id: 9,
+    name: "GoldenYears Senior Health Hub",
+    address: "160 Park Avenue North",
+    phone: "(555) 320-8800",
+    category: "primary-care",
+    categoryLabel: "Primary Care",
+    tags: ["Seniors 65+", "Medicare", "Transportation Assist"],
+    access: ["medicaid"],
+    population: ["senior"],
+    hours: "Mon–Fri 8am–4pm",
+    open: true,
+    distance: "2.9 mi",
+    website: "#",
+    notes: "Geriatric primary care, fall prevention programs, and care coordination.",
+  },
+  {
+    id: 10,
+    name: "Clarity Behavioral Health (Telehealth)",
+    address: "Online — serves your region",
+    phone: "(555) 540-2200",
+    category: "mental-health",
+    categoryLabel: "Mental Health",
+    tags: ["Telehealth Only", "Sliding Scale", "Same-week Appointments"],
+    access: ["sliding-scale","telehealth"],
+    population: ["lgbtq","spanish","veterans"],
+    hours: "Mon–Sun 7am–9pm",
+    open: true,
+    distance: "Virtual",
+    website: "#",
+    notes: "Licensed therapists and prescribers available online 7 days a week.",
+  },
+  {
+    id: 11,
+    name: "Kidwell Pediatric & Family Medicine",
+    address: "2040 Creekside Drive",
+    phone: "(555) 880-3344",
+    category: "primary-care",
+    categoryLabel: "Primary Care",
+    tags: ["Pediatric", "CHIP Accepted", "Walk-in (AM)"],
+    access: ["medicaid","walk-in"],
+    population: ["pediatric"],
+    hours: "Mon–Fri 8am–6pm · Sat 8am–12pm",
+    open: true,
+    distance: "3.2 mi",
+    website: "#",
+    notes: "Newborns through 18, plus adult family medicine. Spanish interpreter available.",
+  },
+  {
+    id: 12,
+    name: "Recovery Path Substance Use Center",
+    address: "75 Ridgeway Ct",
+    phone: "(555) 210-6600",
+    category: "community",
+    categoryLabel: "Community Health",
+    tags: ["Free", "Walk-in", "MAT Available"],
+    access: ["uninsured","walk-in"],
+    population: ["veterans","lgbtq"],
+    hours: "Mon–Fri 8am–8pm",
+    open: true,
+    distance: "3.8 mi",
+    website: "#",
+    notes: "Outpatient substance use treatment, medication-assisted treatment (MAT), and counseling.",
+  },
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+const state = {
+  zip: '',
+  searched: false,
+  filters: { careType: new Set(), access: new Set(), population: new Set() }
+};
+
+// ── FILTER LOGIC ─────────────────────────────────────────────────────────────
+function toggleFilter(pill) {
+  const group = pill.dataset.group;
+  const value = pill.dataset.value;
+  const map = { careType: state.filters.careType, access: state.filters.access, population: state.filters.population };
+  const set = map[group];
+  if (set.has(value)) { set.delete(value); pill.classList.remove('active'); }
+  else                 { set.add(value);    pill.classList.add('active'); }
+  if (state.searched) renderCards();
+}
+
+function clearFilters() {
+  state.filters.careType.clear();
+  state.filters.access.clear();
+  state.filters.population.clear();
+  document.querySelectorAll('.pill.active').forEach(p => p.classList.remove('active'));
+  if (state.searched) renderCards();
+}
+
+function matchesFilters(r) {
+  const { careType, access, population } = state.filters;
+  if (careType.size   && !careType.has(r.category))          return false;
+  if (access.size     && !r.access.some(a => access.has(a))) return false;
+  if (population.size && !r.population.some(p => population.has(p))) return false;
+  return true;
+}
+
+// ── SEARCH ───────────────────────────────────────────────────────────────────
+function doSearch() {
+  const zip = document.getElementById('zipInput').value.trim();
+  const err = document.getElementById('zipError');
+  if (!/^\d{5}$/.test(zip)) { err.classList.add('show'); return; }
+  err.classList.remove('show');
+  state.zip = zip;
+  state.searched = true;
+
+  document.getElementById('introState').style.display = 'none';
+  document.getElementById('emptyState').classList.remove('visible');
+  document.getElementById('cardsGrid').innerHTML = '';
+  document.getElementById('resultsHeader').classList.remove('visible');
+
+  const loading = document.getElementById('loadingState');
+  loading.classList.add('visible');
+
+  document.getElementById('filtersSection').classList.add('visible');
+
+  setTimeout(() => {
+    loading.classList.remove('visible');
+    document.getElementById('zipDisplay').textContent = zip;
+    document.getElementById('resultsHeader').classList.add('visible');
+    renderCards();
+  }, 900);
+}
+
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  const emptyState = document.getElementById('emptyState');
+  const countEl = document.getElementById('resultsCount');
+
+  const filtered = RESOURCES.filter(matchesFilters);
+  grid.innerHTML = '';
+
+  if (filtered.length === 0) {
+    emptyState.classList.add('visible');
+    countEl.textContent = '';
+    return;
+  }
+
+  emptyState.classList.remove('visible');
+  countEl.textContent = `${filtered.length} resource${filtered.length !== 1 ? 's' : ''} found`;
+
+  filtered.forEach((r, i) => {
+    const card = document.createElement('div');
+    card.className = `card cat-${r.category}`;
+    card.style.animationDelay = `${i * 55}ms`;
+    card.innerHTML = `
+      <div class="card-accent"></div>
+      <div class="card-tag">
+        ${categoryIcon(r.category)} ${r.categoryLabel}
+      </div>
+      <div class="card-name">${r.name}</div>
+      <div class="card-address">${r.address}</div>
+      <div class="card-badges">
+        ${r.tags.map(t => `<span class="badge">${t}</span>`).join('')}
+      </div>
+      <div class="card-hours ${r.open ? 'hours-open' : 'hours-closed'}">
+        ${r.open ? '● Open now' : '○ Closed'} · ${r.hours}
+      </div>
+      <div class="card-meta">
+        <a class="card-phone" href="tel:${r.phone}">${r.phone}</a>
+        <span class="card-distance">📍 ${r.distance}</span>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn btn-primary" onclick="alert('Directions for ${r.name} would open in Maps.')">Get Directions</button>
+        <button class="card-btn btn-outline" onclick="alert('More info for ${r.name}: ${r.notes}')">More Info</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function categoryIcon(cat) {
+  const icons = {
+    'primary-care':'🏥','mental-health':'🧠','urgent-care':'🚑',
+    'pharmacy':'💊','dental':'🦷','specialty':'🔬','community':'🤝'
+  };
+  return icons[cat] || '🏥';
+}
+
+// ── KEYBOARD ENTER ────────────────────────────────────────────────────────────
+document.getElementById('zipInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+</script>
+</body>
+</html>
